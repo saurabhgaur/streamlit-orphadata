@@ -5,18 +5,22 @@ from streamlit_chat import message
 from langchain.chains import ConversationChain
 from langchain.llms import OpenAI
 
+from langchain.agents import create_csv_agent
+from langchain.llms import OpenAI
 
-def load_chain():
+
+def load_agent():
     """Logic for loading the chain you want to use should go here."""
-    llm = OpenAI(temperature=0)
-    chain = ConversationChain(llm=llm)
-    return chain
+    agent = create_csv_agent(OpenAI(temperature=0), "./Orphanet-en_product4.csv", verbose=True)
 
-chain = load_chain()
+    llm = OpenAI(temperature=0)
+    return agent
+
+agent = load_agent()
 
 # From here down is all the StreamLit UI.
-st.set_page_config(page_title="LangChain Demo", page_icon=":robot:")
-st.header("LangChain Demo")
+st.set_page_config(page_title="RGDs Search", page_icon=":robot:")
+st.header("RGDs Search")
 
 if "generated" not in st.session_state:
     st.session_state["generated"] = []
@@ -33,7 +37,7 @@ def get_text():
 user_input = get_text()
 
 if user_input:
-    output = chain.run(input=user_input)
+    output = agent.run(user_input)
 
     st.session_state.past.append(user_input)
     st.session_state.generated.append(output)
